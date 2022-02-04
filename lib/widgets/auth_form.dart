@@ -1,36 +1,41 @@
-// ignore_for_file: prefer_const_constructors, use_key_in_widget_constructors, prefer_const_literals_to_create_immutables, deprecated_member_use, unused_field, unused_element, avoid_print, prefer_final_fields
-
+// ignore_for_file: prefer_const_constructors, use_key_in_widget_constructors, prefer_const_literals_to_create_immutables, deprecated_member_use, unused_field, unused_element, avoid_print, prefer_final_fields, prefer_const_constructors_in_immutables
 
 import 'package:flutter/material.dart';
 
 class AuthForm extends StatefulWidget {
-  AuthForm(this.saveAuthForm);
+ final bool isLoadding;
+  AuthForm(this.saveAuthForm, this.isLoadding);
 
   final void Function(
     String email,
     String password,
     String username,
     bool isLogin,
+    BuildContext ctx,
   ) saveAuthForm;
   @override
   _AuthFormState createState() => _AuthFormState();
 }
 
 class _AuthFormState extends State<AuthForm> {
-  
-
-  final _formKey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>(); // to add keys so that each field is unique
   var _isLogin = true;
   var userEmail = '';
   var userName = '';
   var userPassword = '';
 
   void _trySubmit() {
-    final isValid = _formKey.currentState!.validate();
-    FocusScope.of(context).unfocus(); // remoove the keyboard
+    final isValid = _formKey.currentState!.validate(); // validate the entries
+    FocusScope.of(context).unfocus(); // remove the keyboard
     if (isValid) {
-      _formKey.currentState!.save(); // triger all  onsave on textfield
-      widget.saveAuthForm(userEmail, userPassword, userName, _isLogin);
+      _formKey.currentState!.save(); // trigger all  onsave on textfield
+      widget.saveAuthForm(  // refering to the widget coming from authScreen
+        userEmail.trim(),
+        userPassword.trim(),
+        userName.trim(),
+        _isLogin,
+        context,
+      );
     }
   }
 
@@ -98,10 +103,14 @@ class _AuthFormState extends State<AuthForm> {
                   SizedBox(
                     height: 10,
                   ),
+                  if(widget.isLoadding)
+                  CircularProgressIndicator(),
+                  if(!widget.isLoadding)
                   RaisedButton(
                     onPressed: _trySubmit,
                     child: Text(_isLogin ? 'Login' : 'Signup'),
                   ),
+                  if(!widget.isLoadding)
                   FlatButton(
                     textColor: Theme.of(context).primaryColor,
                     onPressed: () {
